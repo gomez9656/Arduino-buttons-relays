@@ -1,13 +1,12 @@
-//Define pins
+//Define button, relay, and beeper pins
 #define button1 2
 #define button2 3
 #define button3 4
 #define button4 5
-
 #define relay   13
-#define beeper 14
+#define beeper  14
 
-//define time duration in ms
+//define time duration for each button in ms
 uint16_t time1 = 1000;
 uint16_t time2 = 2000;
 uint16_t time3 = 3000;
@@ -32,17 +31,18 @@ void setup() {
 
   Serial.begin(9600);
 
+  //set inputs and outputs
   pinMode(button1, INPUT);
   pinMode(button2, INPUT);
   pinMode(button3, INPUT);
   pinMode(button4, INPUT);
-
   pinMode(relay, OUTPUT);
   pinMode(beeper, OUTPUT);
 }
 
 void loop() {
 
+  //check button status using polling mode.
   checkButton(button1);
   checkButton(button2);
   checkButton(button3);
@@ -115,22 +115,31 @@ void trigger_relay(int button) {
 void programming_mode(int button) {
   digitalWrite(beeper, HIGH);
 
-  while (digitalRead(button4) != 1) {
+  //0 means me are in programming status
+  int programming_status = 0;
 
-    buttonState = digitalRead(button);
+  while (programming_status != 0) { //if button 4 is pressed it means we need to exit programming mode
+
+    buttonState = digitalRead(button); // read button status based upon function parameter
 
     if (buttonState != lastButtonState) { // button state changed
-      countButtonTime(button);
+      countButtonTime(button);            //due to status change, we need to count the button time being pressed
     }
     lastButtonState = buttonState;        // save state for next loop
+
+    programming_status = digitalRead(button4);
   }
 
-  if (programming_mode == false) {
+  //1 means ww need to exit programming status
+  if (programming_status == 1) {
 
     digitalWrite(beeper, LOW);
   }
 }
 
+/*
+ * count how long the button is being pressed
+ */
 void countButtonTime(int button) {
 
   if (buttonState == HIGH) {        // the button has been just pressed
@@ -139,7 +148,7 @@ void countButtonTime(int button) {
   else {                             // the button has been just released
     endPressed = millis();
     holdTime = endPressed - startPressed;
-    
+
     // assign new times
     if (button == button1) {
       time1 += holdTime;
