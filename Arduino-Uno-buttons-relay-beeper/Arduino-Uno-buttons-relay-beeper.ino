@@ -1,4 +1,4 @@
-//Define button, relay, and beeper pins
+  //Define button, relay, and beeper pins
 #define button1 2
 #define button2 3
 #define button3 4
@@ -41,12 +41,13 @@ void setup() {
 }
 
 void loop() {
-
   //check button status using polling mode.
   checkButton(button1);
-  checkButton(button2);
-  checkButton(button3);
-  checkButton(button4);
+  Serial.println(digitalRead(buttonState));
+  //checkButton(button2);
+  //checkButton(button3);
+  //checkButton(button4);
+
 }
 
 /*
@@ -55,7 +56,7 @@ void loop() {
 void checkButton(int button) {
 
   buttonState = digitalRead(button);
-
+  
   if (buttonState != lastButtonState) { // button state changed
     updateState(button);
   }
@@ -78,12 +79,12 @@ void updateState(int button) {
 
     if (holdTime < 2000) {
       Serial.println("Button was held for less than two second");
-      trigger_relay(button);
+      //trigger_relay(button);
     }
 
     if (holdTime >= 2000) {
       Serial.println("Button was held for two second or more");
-      programming_mode(button);
+      //programming_mode(button);
     }
   }
 }
