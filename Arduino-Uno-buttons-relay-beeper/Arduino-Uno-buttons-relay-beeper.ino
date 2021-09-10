@@ -1,10 +1,10 @@
-  //Define button, relay, and beeper pins
-#define button1 2
-#define button2 3
-#define button3 4
-#define button4 5
-#define relay   13
-#define beeper  14
+//Define button, relay, and beeper pins
+#define button1 8
+#define button2 9
+#define button3 10
+#define button4 11
+#define relay   12
+#define beeper  13
 
 //define time duration for each button in ms
 uint16_t time1 = 1000;
@@ -12,23 +12,47 @@ uint16_t time2 = 2000;
 uint16_t time3 = 3000;
 uint16_t time4 = 4000;
 
-//function declaration
-void checkButton(int button);
-void updateState(int button);
-void trigger_relay(int button);
-void programming_mode(int button);
-void countButtonTime(int button);
+//functions declaration
+void checkButton1();
+void updateState1();
+void checkButton2();
+void updateState2();
+void checkButton3();
+void updateState3();
+void checkButton4();
+void updateState4();
 
-int buttonState = 0;      // current state of the button
-int lastButtonState = 0;  // previous state of the button
-int startPressed = 0;     // the moment the button was pressed
-int endPressed = 0;       // the moment the button was released
-int holdTime = 0;         // how long the button was hold
-int idleTime = 0;         // how long the button was idle
-uint16_t time_button_pressed = 0;
+int buttonState1 = 0;      // current state of the button
+int lastButtonState1 = 0;  // previous state of the button
+int startPressed1 = 10;     // the moment the button was pressed
+int endPressed1 = 0;       // the moment the button was released
+int holdTime1 = 0;         // how long the button was hold
+int idleTime1 = 0;         // how long the button was idle
+
+int buttonState2 = 0;      // current state of the button
+int lastButtonState2 = 0;  // previous state of the button
+int startPressed2 = 10;     // the moment the button was pressed
+int endPressed2 = 0;       // the moment the button was released
+int holdTime2 = 0;         // how long the button was hold
+int idleTime2 = 0;         // how long the button was idle
+
+int buttonState3 = 0;      // current state of the button
+int lastButtonState3 = 0;  // previous state of the button
+int startPressed3 = 10;     // the moment the button was pressed
+int endPressed3 = 0;       // the moment the button was released
+int holdTime3 = 0;         // how long the button was hold
+int idleTime3 = 0;         // how long the button was idle
+
+int buttonState4 = 0;      // current state of the button
+int lastButtonState4 = 0;  // previous state of the button
+int startPressed4 = 10;     // the moment the button was pressed
+int endPressed4 = 0;       // the moment the button was released
+int holdTime4 = 0;         // how long the button was hold
+int idleTime4 = 0;         // how long the button was idle
+
 
 void setup() {
-
+  // put your setup code here, to run once:
   Serial.begin(9600);
 
   //set inputs and outputs
@@ -36,54 +60,155 @@ void setup() {
   pinMode(button2, INPUT);
   pinMode(button3, INPUT);
   pinMode(button4, INPUT);
+
   pinMode(relay, OUTPUT);
   pinMode(beeper, OUTPUT);
 }
 
 void loop() {
-  //check button status using polling mode.
-  checkButton(button1);
-  Serial.println(digitalRead(buttonState));
-  //checkButton(button2);
-  //checkButton(button3);
-  //checkButton(button4);
-
+  // put your main code here, to run repeatedly:
+  checkButton1();
+  checkButton2();
+  checkButton3();
+  checkButton4();
 }
 
-/*
-   check the button status. If the status changed, then update the status
-*/
-void checkButton(int button) {
+void checkButton1() {
 
-  buttonState = digitalRead(button);
-  
-  if (buttonState != lastButtonState) { // button state changed
-    updateState(button);
+  buttonState1 = digitalRead(button1);
+
+  if (buttonState1 != lastButtonState1) { // button state changed
+    updateState1();
   }
 
-  lastButtonState = buttonState;        // save state for next loop
+  lastButtonState1 = buttonState1;        // save state for next loop
 }
 
 /*
    start measuring the time the button was pressed.
    if the status changed, then calculate the time the button was pressed
 */
-void updateState(int button) {
+void updateState1() {
 
-  if (buttonState == HIGH) {         // the button has been just pressed
-    startPressed = millis();
+  if (buttonState1 == HIGH) {         // the button has been just pressed
+    startPressed1 = millis();
   }
   else {                             // the button has been just released
-    endPressed = millis();
-    holdTime = endPressed - startPressed;
+    endPressed1 = millis();
+    holdTime1 = endPressed1 - startPressed1;
 
-    if (holdTime < 2000) {
-      Serial.println("Button was held for less than two second");
-      //trigger_relay(button);
+    if (holdTime1 < 2000) {
+
+      trigger_relay(button1);
     }
 
-    if (holdTime >= 2000) {
-      Serial.println("Button was held for two second or more");
+    if (holdTime1 >= 2000) {
+
+      //programming_mode(button);
+    }
+  }
+}
+
+void checkButton2() {
+
+  buttonState2 = digitalRead(button2);
+
+  if (buttonState2 != lastButtonState2) { // button state changed
+    updateState2();
+  }
+
+  lastButtonState2 = buttonState2;        // save state for next loop
+}
+
+/*
+   start measuring the time the button was pressed.
+   if the status changed, then calculate the time the button was pressed
+*/
+void updateState2() {
+
+  if (buttonState2 == HIGH) {         // the button has been just pressed
+    startPressed2 = millis();
+  }
+  else {                             // the button has been just released
+    endPressed2 = millis();
+    holdTime2 = endPressed2 - startPressed2;
+
+    if (holdTime2 < 2000) {
+
+      trigger_relay(button2);
+    }
+
+    if (holdTime2 >= 2000) {
+
+      //programming_mode(button);
+    }
+  }
+}
+
+void checkButton3() {
+
+  buttonState3 = digitalRead(button3);
+
+  if (buttonState3 != lastButtonState3) { // button state changed
+    updateState3();
+  }
+
+  lastButtonState3 = buttonState3;        // save state for next loop
+}
+
+/*
+   start measuring the time the button was pressed.
+   if the status changed, then calculate the time the button was pressed
+*/
+void updateState3() {
+
+  if (buttonState3 == HIGH) {         // the button has been just pressed
+    startPressed3 = millis();
+  }
+  else {                             // the button has been just released
+    endPressed3 = millis();
+    holdTime3 = endPressed3 - startPressed3;
+
+    if (holdTime3 < 2000) {
+      trigger_relay(button3);
+    }
+
+    if (holdTime3 >= 2000) {
+
+      //programming_mode(button);
+    }
+  }
+}
+
+void checkButton4() {
+
+  buttonState4 = digitalRead(button4);
+
+  if (buttonState4 != lastButtonState4) { // button state changed
+    updateState4();
+  }
+
+  lastButtonState4 = buttonState4;        // save state for next loop
+}
+
+/*
+   start measuring the time the button was pressed.
+   if the status changed, then calculate the time the button was pressed
+*/
+void updateState4() {
+
+  if (buttonState4 == HIGH) {         // the button has been just pressed
+    startPressed4 = millis();
+  }
+  else {                             // the button has been just released
+    endPressed4 = millis();
+    holdTime4 = endPressed4 - startPressed4;
+
+    if (holdTime4 < 2000) {
+      trigger_relay(button4);
+    }
+
+    if (holdTime4 >= 2000) {
       //programming_mode(button);
     }
   }
@@ -110,58 +235,5 @@ void trigger_relay(int button) {
     digitalWrite(relay, HIGH);
     delay(time4);
     digitalWrite(relay, LOW);
-  }
-}
-
-void programming_mode(int button) {
-  digitalWrite(beeper, HIGH);
-
-  //0 means me are in programming status
-  int programming_status = 0;
-
-  while (programming_status != 0) { //if button 4 is pressed it means we need to exit programming mode
-
-    buttonState = digitalRead(button); // read button status based upon function parameter
-
-    if (buttonState != lastButtonState) { // button state changed
-      countButtonTime(button);            //due to status change, we need to count the button time being pressed
-    }
-    lastButtonState = buttonState;        // save state for next loop
-
-    programming_status = digitalRead(button4);
-  }
-
-  //1 means ww need to exit programming status
-  if (programming_status == 1) {
-
-    digitalWrite(beeper, LOW);
-  }
-}
-
-/*
- * count how long the button is being pressed
- */
-void countButtonTime(int button) {
-
-  if (buttonState == HIGH) {        // the button has been just pressed
-    startPressed = millis();
-  }
-  else {                             // the button has been just released
-    endPressed = millis();
-    holdTime = endPressed - startPressed;
-
-    // assign new times
-    if (button == button1) {
-      time1 += holdTime;
-    }
-    else if (button == button2) {
-      time2 += holdTime;
-    }
-    else if (button == button3) {
-      time3 += holdTime;
-    }
-    else if (button == button4) {
-      time4 += holdTime;
-    }
   }
 }
