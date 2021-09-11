@@ -4,7 +4,7 @@
 #define button3 10
 #define button4 11
 #define relay   12
-#define beeper  13
+#define beeper  7
 
 //define time duration for each button in ms
 uint16_t time1 = 1000;
@@ -21,6 +21,8 @@ void checkButton3();
 void updateState3();
 void checkButton4();
 void updateState4();
+void trigger_relay(int button);
+void programming_mode(int button);
 
 int buttonState1 = 0;      // current state of the button
 int lastButtonState1 = 0;  // previous state of the button
@@ -73,6 +75,43 @@ void loop() {
   checkButton4();
 }
 
+void programming_mode(int button) {
+  delay(1000);
+
+  digitalWrite(beeper, HIGH);
+  if (button == button1) {
+    time1 = 0;
+  }
+  while (digitalRead(button4) != HIGH) {
+    if (button == button1) {
+      checkTime1();
+    }
+  }
+  delay(1000);
+  digitalWrite(beeper, LOW);
+
+}
+
+void checkTime1() {
+
+  buttonState1 = digitalRead(button1);
+
+  if (buttonState1 != lastButtonState1) { // button state changed
+    if (buttonState1 == HIGH) {         // the button has been just pressed
+      startPressed1 = millis();
+    }
+    else {                             // the button has been just released
+      endPressed1 = millis();
+      holdTime1 = endPressed1 - startPressed1;
+      time1 += holdTime1;
+      Serial.println(time1);
+    }
+  }
+
+  lastButtonState1 = buttonState1;        // save state for next loop
+}
+
+
 void checkButton1() {
 
   buttonState1 = digitalRead(button1);
@@ -104,7 +143,7 @@ void updateState1() {
 
     if (holdTime1 >= 2000) {
 
-      //programming_mode(button);
+      programming_mode(button1);
     }
   }
 }
@@ -140,7 +179,7 @@ void updateState2() {
 
     if (holdTime2 >= 2000) {
 
-      //programming_mode(button);
+      programming_mode(button2);
     }
   }
 }
@@ -175,7 +214,7 @@ void updateState3() {
 
     if (holdTime3 >= 2000) {
 
-      //programming_mode(button);
+      programming_mode(button3);
     }
   }
 }
@@ -209,7 +248,8 @@ void updateState4() {
     }
 
     if (holdTime4 >= 2000) {
-      //programming_mode(button);
+
+      programming_mode(button4);
     }
   }
 }
