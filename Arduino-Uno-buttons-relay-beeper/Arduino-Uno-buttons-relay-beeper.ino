@@ -18,10 +18,13 @@ void updateState1();
 void checkTime1();
 void checkButton2();
 void updateState2();
+void checkTime2();
 void checkButton3();
 void updateState3();
+void checkTime3();
 void checkButton4();
 void updateState4();
+void checkTime4();
 void trigger_relay(int button);
 void programming_mode(int button);
 
@@ -82,18 +85,34 @@ void programming_mode(int button) {
 
   digitalWrite(beeper, HIGH);
 
-  while (digitalRead(button4) != HIGH) {
-    if (button == button1) {
-      checkTime1();
+  if (button == button4) {
+    while (digitalRead(button1) != HIGH) {
+      checkTime4();
     }
-    if (button == button2) {
-      checkTime2();
-    }
-    if (button == button3) {
-      checkTime3();
+    digitalWrite(beeper, LOW);
+    delay(500);
+    digitalWrite(beeper, HIGH);
+    delay(500);
+    digitalWrite(beeper, LOW);
+    delay(500);
+    digitalWrite(beeper, HIGH);
+  }
+
+  if (button == button1 | button == button2 | button == button3) {
+    while (digitalRead(button4) != HIGH) {
+      if (button == button1) {
+        checkTime1();
+      }
+      if (button == button2) {
+        checkTime2();
+      }
+      if (button == button3) {
+        checkTime3();
+      }
     }
   }
-  delay(1000);
+
+  delay(500);
   digitalWrite(beeper, LOW);
 
 }
@@ -112,12 +131,12 @@ void checkTime1() {
       holdTime1 = endPressed1 - startPressed1;
       digitalWrite(relay, LOW);
       time1 += holdTime1;                       //add time pressed to corresponging button time
-      
+
       if (first_time == true) {
         time1 = 0;
         first_time = false;
       }
-      
+
       Serial.println(time1);
     }
   }
@@ -139,12 +158,12 @@ void checkTime2() {
       holdTime2 = endPressed2 - startPressed2;
       digitalWrite(relay, LOW);
       time2 += holdTime2;                       //add time pressed to corresponging button time
-      
+
       if (first_time == true) {
-        time2= 0;
+        time2 = 0;
         first_time = false;
       }
-      
+
       Serial.println(time2);
     }
   }
@@ -166,18 +185,46 @@ void checkTime3() {
       holdTime3 = endPressed3 - startPressed3;
       digitalWrite(relay, LOW);
       time3 += holdTime3;                       //add time pressed to corresponging button time
-      
+
       if (first_time == true) {
         time3 = 0;
         first_time = false;
       }
-      
+
       Serial.println(time3);
     }
   }
 
   lastButtonState3 = buttonState3;              // save state for next loop
 }
+
+void checkTime4() {
+
+  buttonState4 = digitalRead(button4);
+
+  if (buttonState4 != lastButtonState4) {       // button state changed
+    if (buttonState4 == HIGH) {                 // the button has been just pressed
+      startPressed4 = millis();
+      digitalWrite(relay, HIGH);
+    }
+    else {                                     // the button has been just released
+      endPressed4 = millis();
+      holdTime4 = endPressed4 - startPressed4;
+      digitalWrite(relay, LOW);
+      time4 += holdTime4;                       //add time pressed to corresponging button time
+
+      if (first_time == true) {
+        time4 = 0;
+        first_time = false;
+      }
+
+      Serial.println(time4);
+    }
+  }
+
+  lastButtonState4 = buttonState4;              // save state for next loop
+}
+
 
 /*
    check if button is pressed or not. If the button is pressed, it means the status changed,
@@ -214,7 +261,7 @@ void updateState1() {
 
     if (holdTime1 >= 2000) {
 
-      first_time = true;            //this is useful to reset the button time 
+      first_time = true;            //this is useful to reset the button time
       programming_mode(button1);
 
     }
