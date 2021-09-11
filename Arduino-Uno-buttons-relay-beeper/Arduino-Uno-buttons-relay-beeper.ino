@@ -74,7 +74,7 @@ void loop() {
   checkButton1();
   checkButton2();
   checkButton3();
-  //checkButton4();
+  checkButton4();
 }
 
 void programming_mode(int button) {
@@ -105,10 +105,12 @@ void checkTime1() {
   if (buttonState1 != lastButtonState1) {       // button state changed
     if (buttonState1 == HIGH) {                 // the button has been just pressed
       startPressed1 = millis();
+      digitalWrite(relay, HIGH);
     }
     else {                                     // the button has been just released
       endPressed1 = millis();
       holdTime1 = endPressed1 - startPressed1;
+      digitalWrite(relay, LOW);
       time1 += holdTime1;                       //add time pressed to corresponging button time
       
       if (first_time == true) {
@@ -130,10 +132,12 @@ void checkTime2() {
   if (buttonState2 != lastButtonState2) {       // button state changed
     if (buttonState2 == HIGH) {                 // the button has been just pressed
       startPressed2 = millis();
+      digitalWrite(relay, HIGH);
     }
     else {                                      // the button has been just released
       endPressed2 = millis();
       holdTime2 = endPressed2 - startPressed2;
+      digitalWrite(relay, LOW);
       time2 += holdTime2;                       //add time pressed to corresponging button time
       
       if (first_time == true) {
@@ -155,10 +159,12 @@ void checkTime3() {
   if (buttonState3 != lastButtonState3) {       // button state changed
     if (buttonState3 == HIGH) {                 // the button has been just pressed
       startPressed3 = millis();
+      digitalWrite(relay, HIGH);
     }
     else {                                      // the button has been just released
       endPressed3 = millis();
       holdTime3 = endPressed3 - startPressed3;
+      digitalWrite(relay, LOW);
       time3 += holdTime3;                       //add time pressed to corresponging button time
       
       if (first_time == true) {
