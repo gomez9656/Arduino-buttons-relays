@@ -116,7 +116,6 @@ void programming_mode(int button) {
 
   delay(500);
   digitalWrite(beeper, LOW);
-
 }
 
 void checkTime1() {
@@ -139,8 +138,6 @@ void checkTime1() {
         time1 = 0;
         first_time = false;
       }
-
-      Serial.println(time1);
     }
   }
 
@@ -166,8 +163,6 @@ void checkTime2() {
         time2 = 0;
         first_time = false;
       }
-
-      Serial.println(time2);
     }
   }
 
@@ -193,8 +188,6 @@ void checkTime3() {
         time3 = 0;
         first_time = false;
       }
-
-      Serial.println(time3);
     }
   }
 
@@ -220,8 +213,6 @@ void checkTime4() {
         time4 = 0;
         first_time = false;
       }
-
-      Serial.println(time4);
     }
   }
 
@@ -266,7 +257,6 @@ void updateState1() {
 
       first_time = true;
       programming_mode(button1);
-
     }
   }
 }
