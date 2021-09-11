@@ -72,8 +72,8 @@ void setup() {
 void loop() {
 
   checkButton1();
-  //checkButton2();
-  //checkButton3();
+  checkButton2();
+  checkButton3();
   //checkButton4();
 }
 
@@ -135,6 +135,12 @@ void checkTime2() {
       endPressed2 = millis();
       holdTime2 = endPressed2 - startPressed2;
       time2 += holdTime2;                       //add time pressed to corresponging button time
+      
+      if (first_time == true) {
+        time2= 0;
+        first_time = false;
+      }
+      
       Serial.println(time2);
     }
   }
@@ -154,6 +160,12 @@ void checkTime3() {
       endPressed3 = millis();
       holdTime3 = endPressed3 - startPressed3;
       time3 += holdTime3;                       //add time pressed to corresponging button time
+      
+      if (first_time == true) {
+        time3 = 0;
+        first_time = false;
+      }
+      
       Serial.println(time3);
     }
   }
@@ -196,7 +208,7 @@ void updateState1() {
 
     if (holdTime1 >= 2000) {
 
-      first_time = true;
+      first_time = true;            //this is useful to reset the button time 
       programming_mode(button1);
 
     }
@@ -228,7 +240,7 @@ void updateState2() {
     holdTime2 = endPressed2 - startPressed2;
 
     if (holdTime2 < 2000) {
-
+      first_time = true;
       trigger_relay(button2);
     }
 
@@ -268,7 +280,7 @@ void updateState3() {
     }
 
     if (holdTime3 >= 2000) {
-
+      first_time = true;
       programming_mode(button3);
     }
   }
@@ -303,7 +315,7 @@ void updateState4() {
     }
 
     if (holdTime4 >= 2000) {
-
+      first_time = true;
       programming_mode(button4);
     }
   }
