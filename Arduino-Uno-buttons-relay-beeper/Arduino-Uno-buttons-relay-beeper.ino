@@ -28,29 +28,29 @@ void checkTime4();
 void trigger_relay(int button);
 void programming_mode(int button);
 
-int buttonState1 = 0;      // current state of the button
-int lastButtonState1 = 0;  // previous state of the button
+int buttonState1 = 1;      // current state of the button
+int lastButtonState1 = 1;  // previous state of the button
 int startPressed1 = 10;     // the moment the button was pressed
 int endPressed1 = 0;       // the moment the button was released
 int holdTime1 = 0;         // how long the button was hold
 int idleTime1 = 0;         // how long the button was idle
 
-int buttonState2 = 0;      // current state of the button
-int lastButtonState2 = 0;  // previous state of the button
+int buttonState2 = 1;      // current state of the button
+int lastButtonState2 = 1;  // previous state of the button
 int startPressed2 = 10;     // the moment the button was pressed
 int endPressed2 = 0;       // the moment the button was released
 int holdTime2 = 0;         // how long the button was hold
 int idleTime2 = 0;         // how long the button was idle
 
-int buttonState3 = 0;      // current state of the button
-int lastButtonState3 = 0;  // previous state of the button
+int buttonState3 = 1;      // current state of the button
+int lastButtonState3 = 1;  // previous state of the button
 int startPressed3 = 10;     // the moment the button was pressed
 int endPressed3 = 0;       // the moment the button was released
 int holdTime3 = 0;         // how long the button was hold
 int idleTime3 = 0;         // how long the button was idle
 
-int buttonState4 = 0;      // current state of the button
-int lastButtonState4 = 0;  // previous state of the button
+int buttonState4 = 1;      // current state of the button
+int lastButtonState4 = 1;  // previous state of the button
 int startPressed4 = 10;     // the moment the button was pressed
 int endPressed4 = 0;       // the moment the button was released
 int holdTime4 = 0;         // how long the button was hold
@@ -63,10 +63,10 @@ void setup() {
   Serial.begin(9600);
 
   //set inputs and outputs
-  pinMode(button1, INPUT);
-  pinMode(button2, INPUT);
-  pinMode(button3, INPUT);
-  pinMode(button4, INPUT);
+  pinMode(button1, INPUT_PULLUP);
+  pinMode(button2, INPUT_PULLUP);
+  pinMode(button3, INPUT_PULLUP);
+  pinMode(button4, INPUT_PULLUP);
 
   pinMode(relay, OUTPUT);
   pinMode(beeper, OUTPUT);
@@ -87,7 +87,7 @@ void programming_mode(int button) {
 
   //to exit programming mode for button 4 the user needs to press button 1
   if (button == button4) {
-    while (digitalRead(button1) != HIGH) {
+    while (digitalRead(button1) != LOW) {
       checkTime4();
     }
     //different delay for beeper to differentiate from button 1, 2 and 3
@@ -101,7 +101,7 @@ void programming_mode(int button) {
   }
 
   if (button == button1 | button == button2 | button == button3) {
-    while (digitalRead(button4) != HIGH) {
+    while (digitalRead(button4) != LOW) {
       if (button == button1) {
         checkTime1();
       }
@@ -123,7 +123,7 @@ void checkTime1() {
   buttonState1 = digitalRead(button1);
 
   if (buttonState1 != lastButtonState1) {       // button state changed
-    if (buttonState1 == HIGH) {                 // the button has been just pressed
+    if (buttonState1 == LOW) {                 // the button has been just pressed
       startPressed1 = millis();
       digitalWrite(relay, HIGH);
     }
@@ -149,7 +149,7 @@ void checkTime2() {
   buttonState2 = digitalRead(button2);
 
   if (buttonState2 != lastButtonState2) {       // button state changed
-    if (buttonState2 == HIGH) {                 // the button has been just pressed
+    if (buttonState2 == LOW) {                 // the button has been just pressed
       startPressed2 = millis();
       digitalWrite(relay, HIGH);
     }
@@ -174,7 +174,7 @@ void checkTime3() {
   buttonState3 = digitalRead(button3);
 
   if (buttonState3 != lastButtonState3) {       // button state changed
-    if (buttonState3 == HIGH) {                 // the button has been just pressed
+    if (buttonState3 == LOW) {                 // the button has been just pressed
       startPressed3 = millis();
       digitalWrite(relay, HIGH);
     }
@@ -199,7 +199,7 @@ void checkTime4() {
   buttonState4 = digitalRead(button4);
 
   if (buttonState4 != lastButtonState4) {       // button state changed
-    if (buttonState4 == HIGH) {                 // the button has been just pressed
+    if (buttonState4 == LOW) {                 // the button has been just pressed
       startPressed4 = millis();
       digitalWrite(relay, HIGH);
     }
@@ -241,7 +241,7 @@ void checkButton1() {
 
 void updateState1() {
 
-  if (buttonState1 == HIGH) {         // the button has been just pressed
+  if (buttonState1 == LOW) {         // the button has been just pressed
     startPressed1 = millis();
   }
   else {                             // the button has been just released
@@ -278,7 +278,7 @@ void checkButton2() {
 */
 void updateState2() {
 
-  if (buttonState2 == HIGH) {         // the button has been just pressed
+  if (buttonState2 == LOW) {         // the button has been just pressed
     startPressed2 = millis();
   }
   else {                             // the button has been just released
@@ -314,7 +314,7 @@ void checkButton3() {
 */
 void updateState3() {
 
-  if (buttonState3 == HIGH) {         // the button has been just pressed
+  if (buttonState3 == LOW) {         // the button has been just pressed
     startPressed3 = millis();
   }
   else {                             // the button has been just released
@@ -349,7 +349,7 @@ void checkButton4() {
 */
 void updateState4() {
 
-  if (buttonState4 == HIGH) {         // the button has been just pressed
+  if (buttonState4 == LOW) {         // the button has been just pressed
     startPressed4 = millis();
   }
   else {                             // the button has been just released
