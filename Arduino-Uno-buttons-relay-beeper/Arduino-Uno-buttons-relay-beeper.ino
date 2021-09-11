@@ -56,7 +56,7 @@ int endPressed4 = 0;       // the moment the button was released
 int holdTime4 = 0;         // how long the button was hold
 int idleTime4 = 0;         // how long the button was idle
 
-bool first_time = false;
+bool first_time = false;  //this helps to reset the button time when entering the programming mode for first time
 
 void setup() {
 
@@ -85,10 +85,12 @@ void programming_mode(int button) {
 
   digitalWrite(beeper, HIGH);
 
+  //to exit programming mode for button 4 the user needs to press button 1
   if (button == button4) {
     while (digitalRead(button1) != HIGH) {
       checkTime4();
     }
+    //different delay for beeper to differentiate from button 1, 2 and 3
     digitalWrite(beeper, LOW);
     delay(500);
     digitalWrite(beeper, HIGH);
@@ -132,6 +134,7 @@ void checkTime1() {
       digitalWrite(relay, LOW);
       time1 += holdTime1;                       //add time pressed to corresponging button time
 
+      //reset time button when entering programming mode for first time
       if (first_time == true) {
         time1 = 0;
         first_time = false;
@@ -261,7 +264,7 @@ void updateState1() {
 
     if (holdTime1 >= 2000) {
 
-      first_time = true;            //this is useful to reset the button time
+      first_time = true;
       programming_mode(button1);
 
     }
