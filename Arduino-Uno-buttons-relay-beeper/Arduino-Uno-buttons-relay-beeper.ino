@@ -1,4 +1,5 @@
-//Define button, relay, and beeper pins
+#include <EEPROM.h>
+
 #define button1 8
 #define button2 9
 #define button3 10
@@ -6,11 +7,17 @@
 #define relay   12
 #define beeper  7
 
-//define time duration ms for relay depending on each button
+//define time duration in ms for relay depending on each button
 uint16_t time1 = 1000;
 uint16_t time2 = 2000;
 uint16_t time3 = 3000;
 uint16_t time4 = 4000;
+
+//address value in EEPROM for buttons time
+int addr1 = 0;
+int addr2 = 1;
+int addr3 = 2;
+int addr4 = 3;
 
 //functions declaration
 void checkButton1();
@@ -73,7 +80,6 @@ void setup() {
 }
 
 void loop() {
-
   checkButton1();
   checkButton2();
   checkButton3();
@@ -81,6 +87,7 @@ void loop() {
 }
 
 void programming_mode(int button) {
+  
   delay(1000);
 
   digitalWrite(beeper, HIGH);
@@ -132,6 +139,7 @@ void checkTime1() {
       holdTime1 = endPressed1 - startPressed1;
       digitalWrite(relay, LOW);
       time1 += holdTime1;                       //add time pressed to corresponging button time
+      EEPROM.write(addr1, time1 / 128);
 
       //reset time button when entering programming mode for first time
       if (first_time == true) {
@@ -158,6 +166,7 @@ void checkTime2() {
       holdTime2 = endPressed2 - startPressed2;
       digitalWrite(relay, LOW);
       time2 += holdTime2;                       //add time pressed to corresponging button time
+      EEPROM.write(addr2, time2 / 128);
 
       if (first_time == true) {
         time2 = 0;
@@ -183,7 +192,8 @@ void checkTime3() {
       holdTime3 = endPressed3 - startPressed3;
       digitalWrite(relay, LOW);
       time3 += holdTime3;                       //add time pressed to corresponging button time
-
+      EEPROM.write(addr3, time3 / 128);
+      
       if (first_time == true) {
         time3 = 0;
         first_time = false;
@@ -208,7 +218,8 @@ void checkTime4() {
       holdTime4 = endPressed4 - startPressed4;
       digitalWrite(relay, LOW);
       time4 += holdTime4;                       //add time pressed to corresponging button time
-
+      EEPROM.write(addr4, time4 / 128);
+        
       if (first_time == true) {
         time4 = 0;
         first_time = false;
@@ -371,22 +382,22 @@ void trigger_relay(int button) {
 
   if (button == button1) {
     digitalWrite(relay, HIGH);
-    delay(time1);
+    delay(EEPROM.read(addr1) * 128);
     digitalWrite(relay, LOW);
   }
   else if (button == button2) {
     digitalWrite(relay, HIGH);
-    delay(time2);
+    delay(EEPROM.read(addr2) * 128);
     digitalWrite(relay, LOW);
   }
   else if (button == button3) {
     digitalWrite(relay, HIGH);
-    delay(time3);
+    delay(EEPROM.read(addr3) * 128);
     digitalWrite(relay, LOW);
   }
   else if (button == button4) {
     digitalWrite(relay, HIGH);
-    delay(time4);
+    delay(EEPROM.read(addr4) * 128);
     digitalWrite(relay, LOW);
   }
 }
