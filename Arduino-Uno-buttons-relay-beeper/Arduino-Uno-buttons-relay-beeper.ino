@@ -1,10 +1,12 @@
+#include <ezButton.h>
 #include <EEPROM.h>
 
-#define button1 8
-#define button2 9
-#define button3 10
-#define button4 11
-#define relay   12
+#define first_button 8
+#define second_button 9
+#define third_button 10
+#define fourth_button 11
+#define fifth_button 12
+#define relay   13
 #define beeper  7
 
 //define time duration in ms for relay depending on each button
@@ -13,391 +15,615 @@ uint16_t time2 = 2000;
 uint16_t time3 = 3000;
 uint16_t time4 = 4000;
 
+
 //address value in EEPROM for buttons time
 int addr1 = 0;
 int addr2 = 1;
 int addr3 = 2;
 int addr4 = 3;
 
-//functions declaration
-void checkButton1();
-void updateState1();
-void checkTime1();
-void checkButton2();
-void updateState2();
-void checkTime2();
-void checkButton3();
-void updateState3();
-void checkTime3();
-void checkButton4();
-void updateState4();
-void checkTime4();
-void trigger_relay(int button);
-void programming_mode(int button);
+//address value in EEPROM to check if it is first time
+int addr5 = 4;
 
-int buttonState1 = 1;      // current state of the button
-int lastButtonState1 = 1;  // previous state of the button
-int startPressed1 = 10;     // the moment the button was pressed
-int endPressed1 = 0;       // the moment the button was released
-int holdTime1 = 0;         // how long the button was hold
-int idleTime1 = 0;         // how long the button was idle
+int buttonState1 = 1;       //they start as 1 due to pull up resistor
+int lastButtonState1 = 1;   //they start as 1 due to pull up resistor
+int startPressed1 = 0;      //time when the button is pressed for first time
+int holdTime1 = 0;          //time the button was being pressed
+int endPressed1 = 0;        //time when button was released
 
-int buttonState2 = 1;      // current state of the button
-int lastButtonState2 = 1;  // previous state of the button
-int startPressed2 = 10;     // the moment the button was pressed
-int endPressed2 = 0;       // the moment the button was released
-int holdTime2 = 0;         // how long the button was hold
-int idleTime2 = 0;         // how long the button was idle
+int buttonState2 = 1;
+int lastButtonState2 = 1;
+int startPressed2 = 0;
+int holdTime2 = 0;
+int endPressed2 = 0;
 
-int buttonState3 = 1;      // current state of the button
-int lastButtonState3 = 1;  // previous state of the button
-int startPressed3 = 10;     // the moment the button was pressed
-int endPressed3 = 0;       // the moment the button was released
-int holdTime3 = 0;         // how long the button was hold
-int idleTime3 = 0;         // how long the button was idle
+int buttonState3 = 1;
+int lastButtonState3 = 1;
+int startPressed3 = 0;
+int holdTime3 = 0;
+int endPressed3 = 0;
 
-int buttonState4 = 1;      // current state of the button
-int lastButtonState4 = 1;  // previous state of the button
-int startPressed4 = 10;     // the moment the button was pressed
-int endPressed4 = 0;       // the moment the button was released
-int holdTime4 = 0;         // how long the button was hold
-int idleTime4 = 0;         // how long the button was idle
+int buttonState4 = 1;
+int lastButtonState4 = 1;
+int startPressed4 = 0;
+int holdTime4 = 0;
+int endPressed4 = 0;
 
-bool first_time = false;  //this helps to reset the button time when entering the programming mode for first time
+int buttonState5 = 1;
+int lastButtonState5 = 1;
+int startPressed5 = 0;
+int holdTime5 = 0;
+int endPressed5 = 0;
+
+//this variable helps reset the time for each button when entering programming mode
+bool first_time = true;
+
+ezButton button1(first_button);  // create ezButton object that attach to pin
+ezButton button2(second_button);
+ezButton button3(third_button);
+ezButton button4(fourth_button);
+ezButton button5(fifth_button);
+
 
 void setup() {
 
   Serial.begin(9600);
 
   //set inputs and outputs
-  pinMode(button1, INPUT_PULLUP);
-  pinMode(button2, INPUT_PULLUP);
-  pinMode(button3, INPUT_PULLUP);
-  pinMode(button4, INPUT_PULLUP);
+  button1.setDebounceTime(50); // set debounce time to 50 milliseconds
+  button5.setDebounceTime(50);
 
   pinMode(relay, OUTPUT);
   pinMode(beeper, OUTPUT);
+
 }
 
 void loop() {
+
+  // MUST call the loop() function first
+  button1.loop();
+  button2.loop();
+  button3.loop();
+  button4.loop();
+  button5.loop();
+
+  //check if button is pressed
   checkButton1();
   checkButton2();
   checkButton3();
   checkButton4();
+  checkButton5();
 }
 
-void programming_mode(int button) {
-  
-  delay(1000);
-
-  digitalWrite(beeper, HIGH);
-
-  //to exit programming mode for button 4 the user needs to press button 1
-  if (button == button4) {
-    while (digitalRead(button1) != LOW) {
-      checkTime4();
-    }
-    //different delay for beeper to differentiate from button 1, 2 and 3
-    digitalWrite(beeper, LOW);
-    delay(500);
-    digitalWrite(beeper, HIGH);
-    delay(500);
-    digitalWrite(beeper, LOW);
-    delay(500);
-    digitalWrite(beeper, HIGH);
-  }
-
-  if (button == button1 | button == button2 | button == button3) {
-    while (digitalRead(button4) != LOW) {
-      if (button == button1) {
-        checkTime1();
-      }
-      if (button == button2) {
-        checkTime2();
-      }
-      if (button == button3) {
-        checkTime3();
-      }
-    }
-  }
-
-  delay(500);
-  digitalWrite(beeper, LOW);
-}
-
-void checkTime1() {
-
-  buttonState1 = digitalRead(button1);
-
-  if (buttonState1 != lastButtonState1) {       // button state changed
-    if (buttonState1 == LOW) {                 // the button has been just pressed
-      startPressed1 = millis();
-      digitalWrite(relay, HIGH);
-    }
-    else {                                     // the button has been just released
-      endPressed1 = millis();
-      holdTime1 = endPressed1 - startPressed1;
-      digitalWrite(relay, LOW);
-      time1 += holdTime1;                       //add time pressed to corresponging button time
-      EEPROM.write(addr1, time1 / 128);
-
-      //reset time button when entering programming mode for first time
-      if (first_time == true) {
-        time1 = 0;
-        first_time = false;
-      }
-    }
-  }
-
-  lastButtonState1 = buttonState1;              // save state for next loop
-}
-
-void checkTime2() {
-
-  buttonState2 = digitalRead(button2);
-
-  if (buttonState2 != lastButtonState2) {       // button state changed
-    if (buttonState2 == LOW) {                 // the button has been just pressed
-      startPressed2 = millis();
-      digitalWrite(relay, HIGH);
-    }
-    else {                                      // the button has been just released
-      endPressed2 = millis();
-      holdTime2 = endPressed2 - startPressed2;
-      digitalWrite(relay, LOW);
-      time2 += holdTime2;                       //add time pressed to corresponging button time
-      EEPROM.write(addr2, time2 / 128);
-
-      if (first_time == true) {
-        time2 = 0;
-        first_time = false;
-      }
-    }
-  }
-
-  lastButtonState2 = buttonState2;              // save state for next loop
-}
-
-void checkTime3() {
-
-  buttonState3 = digitalRead(button3);
-
-  if (buttonState3 != lastButtonState3) {       // button state changed
-    if (buttonState3 == LOW) {                 // the button has been just pressed
-      startPressed3 = millis();
-      digitalWrite(relay, HIGH);
-    }
-    else {                                      // the button has been just released
-      endPressed3 = millis();
-      holdTime3 = endPressed3 - startPressed3;
-      digitalWrite(relay, LOW);
-      time3 += holdTime3;                       //add time pressed to corresponging button time
-      EEPROM.write(addr3, time3 / 128);
-      
-      if (first_time == true) {
-        time3 = 0;
-        first_time = false;
-      }
-    }
-  }
-
-  lastButtonState3 = buttonState3;              // save state for next loop
-}
-
-void checkTime4() {
-
-  buttonState4 = digitalRead(button4);
-
-  if (buttonState4 != lastButtonState4) {       // button state changed
-    if (buttonState4 == LOW) {                 // the button has been just pressed
-      startPressed4 = millis();
-      digitalWrite(relay, HIGH);
-    }
-    else {                                     // the button has been just released
-      endPressed4 = millis();
-      holdTime4 = endPressed4 - startPressed4;
-      digitalWrite(relay, LOW);
-      time4 += holdTime4;                       //add time pressed to corresponging button time
-      EEPROM.write(addr4, time4 / 128);
-        
-      if (first_time == true) {
-        time4 = 0;
-        first_time = false;
-      }
-    }
-  }
-
-  lastButtonState4 = buttonState4;              // save state for next loop
-}
-
-
-/*
-   check if button is pressed or not. If the button is pressed, it means the status changed,
-   so enter updateState()
-*/
 void checkButton1() {
 
-  buttonState1 = digitalRead(button1);
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed1 = 0;
 
-  if (buttonState1 != lastButtonState1) { // button state changed
-    updateState1();
-  }
+  //time the button has been pressed
+  int currentTime = 0;
 
-  lastButtonState1 = buttonState1;        // save state for next loop
-}
+  //check if button is pressed
+  buttonPress = button1.isPressed();
 
-/*  start measuring the time when the button was pressed.
-    if the status changed, then calculate the time the button was pressed
-*/
+  //if button is pressed stop checking for other buttons and wait until current buttonn is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
 
-void updateState1() {
-
-  if (buttonState1 == LOW) {         // the button has been just pressed
+    //start counting the time
     startPressed1 = millis();
-  }
-  else {                             // the button has been just released
-    endPressed1 = millis();
-    holdTime1 = endPressed1 - startPressed1;
 
-    if (holdTime1 < 2000) {
+    //wait until button is released
+    while (buttonRelease == false) {
 
-      trigger_relay(button1);
+      //trace the time the button has been pressed
+      currentTime = millis() - startPressed1;
+
+      //let the user know that 2 seconds has passed so the user can release the button
+      if (currentTime > 2000) {
+        digitalWrite(beeper, HIGH);
+        Serial.println("ups");
+      }
+
+      button1.loop();
+      buttonRelease = button1.isReleased();
     }
 
-    if (holdTime1 >= 2000) {
-
-      first_time = true;
-      programming_mode(button1);
+    //if the code exits the while loop it means the button was released and the code decides
+    //to go to programming mode or trigger the relay
+    if (buttonRelease == true) {
+      if (currentTime > 2000) {
+        digitalWrite(beeper, LOW);
+        delay(1000);
+        Serial.println("programming");
+        programming_mode(first_button);
+      }
+      else if ( currentTime < 2000) {
+        Serial.println("trigger");
+        trigger_relay(first_button);
+      }
     }
   }
 }
 
 void checkButton2() {
 
-  buttonState2 = digitalRead(button2);
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed2 = 0;
 
-  if (buttonState2 != lastButtonState2) { // button state changed
-    updateState2();
-  }
+  //time the button has been pressed
+  int currentTime = 0;
 
-  lastButtonState2 = buttonState2;        // save state for next loop
-}
+  //check if button is pressed
+  buttonPress = button2.isPressed();
 
-/*
-   start measuring the time the button was pressed.
-   if the status changed, then calculate the time the button was pressed
-*/
-void updateState2() {
+  //if button is pressed stop checking for other buttons and wait until current buttonn is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
 
-  if (buttonState2 == LOW) {         // the button has been just pressed
+    //start counting the time
     startPressed2 = millis();
-  }
-  else {                             // the button has been just released
-    endPressed2 = millis();
-    holdTime2 = endPressed2 - startPressed2;
 
-    if (holdTime2 < 2000) {
-      first_time = true;
-      trigger_relay(button2);
+    //wait until button is released
+    while (buttonRelease == false) {
+
+      //trace the time the button has been pressed
+      currentTime = millis() - startPressed2;
+
+      //let the user know that 2 seconds has passed so the user can release the button
+      if (currentTime > 2000) {
+        digitalWrite(beeper, HIGH);
+        Serial.println("ups");
+      }
+
+      button2.loop();
+      buttonRelease = button2.isReleased();
     }
 
-    if (holdTime2 >= 2000) {
-
-      programming_mode(button2);
+    //if the code exits the while loop it means the button was released and the code decides
+    //to go to programming mode or trigger the relay
+    if (buttonRelease == true) {
+      if (currentTime > 2000) {
+        digitalWrite(beeper, LOW);
+        delay(1000);
+        Serial.println("programming");
+        programming_mode(second_button);
+      }
+      else if ( currentTime < 2000) {
+        Serial.println("trigger");
+        trigger_relay(second_button);
+      }
     }
   }
 }
 
 void checkButton3() {
 
-  buttonState3 = digitalRead(button3);
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed3 = 0;
 
-  if (buttonState3 != lastButtonState3) { // button state changed
-    updateState3();
-  }
+  //time the button has been pressed
+  int currentTime = 0;
 
-  lastButtonState3 = buttonState3;        // save state for next loop
-}
+  //check if button is pressed
+  buttonPress = button3.isPressed();
 
-/*
-   start measuring the time the button was pressed.
-   if the status changed, then calculate the time the button was pressed
-*/
-void updateState3() {
+  //if button is pressed stop checking for other buttons and wait until current buttonn is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
 
-  if (buttonState3 == LOW) {         // the button has been just pressed
+    //start counting the time
     startPressed3 = millis();
-  }
-  else {                             // the button has been just released
-    endPressed3 = millis();
-    holdTime3 = endPressed3 - startPressed3;
 
-    if (holdTime3 < 2000) {
-      trigger_relay(button3);
+    //wait until button is released
+    while (buttonRelease == false) {
+
+      //trace the time the button has been pressed
+      currentTime = millis() - startPressed3;
+
+      //let the user know that 2 seconds has passed so the user can release the button
+      if (currentTime > 2000) {
+        digitalWrite(beeper, HIGH);
+        Serial.println("ups");
+      }
+
+      button3.loop();
+      buttonRelease = button3.isReleased();
     }
 
-    if (holdTime3 >= 2000) {
-      first_time = true;
-      programming_mode(button3);
+    //if the code exits the while loop it means the button was released and the code decides
+    //to go to programming mode or trigger the relay
+    if (buttonRelease == true) {
+      if (currentTime > 2000) {
+        digitalWrite(beeper, LOW);
+        delay(1000);
+        Serial.println("programming");
+        programming_mode(third_button);
+      }
+      else if ( currentTime < 2000) {
+        Serial.println("trigger");
+        trigger_relay(third_button);
+      }
     }
   }
 }
 
 void checkButton4() {
 
-  buttonState4 = digitalRead(button4);
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed4 = 0;
 
-  if (buttonState4 != lastButtonState4) { // button state changed
-    updateState4();
+  //time the button has been pressed
+  int currentTime = 0;
+
+  //check if button is pressed
+  buttonPress = button4.isPressed();
+
+  //if button is pressed stop checking for other buttons and wait until current buttonn is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
+
+    //start counting the time
+    startPressed4 = millis();
+
+    //wait until button is released
+    while (buttonRelease == false) {
+
+      //trace the time the button has been pressed
+      currentTime = millis() - startPressed4;
+
+      //let the user know that 2 seconds has passed so the user can release the button
+      if (currentTime > 2000) {
+        digitalWrite(beeper, HIGH);
+        Serial.println("ups");
+      }
+
+      button4.loop();
+      buttonRelease = button4.isReleased();
+    }
+
+    //if the code exits the while loop it means the button was released and the code decides
+    //to go to programming mode or trigger the relay
+    if (buttonRelease == true) {
+      if (currentTime > 2000) {
+        digitalWrite(beeper, LOW);
+        delay(1000);
+        Serial.println("programming");
+        programming_mode(fourth_button);
+      }
+      else if ( currentTime < 2000) {
+        Serial.println("trigger");
+        trigger_relay(fourth_button);
+      }
+    }
   }
-
-  lastButtonState4 = buttonState4;        // save state for next loop
 }
 
-/*
-   start measuring the time the button was pressed.
-   if the status changed, then calculate the time the button was pressed
-*/
-void updateState4() {
+void checkButton5() {
 
-  if (buttonState4 == LOW) {         // the button has been just pressed
-    startPressed4 = millis();
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed5 = 0;
+
+  //time the button has been pressed
+  int currentTime = 0;
+
+  //check if button is pressed
+  buttonPress = button5.isPressed();
+
+  //if button is pressed stop checking for other buttons and wait until current buttonn is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
+
+    //start counting the time
+    startPressed5 = millis();
+
+    //wait until button is released
+    while (buttonRelease == false) {
+
+      //trace the time the button has been pressed
+      currentTime = millis() - startPressed5;
+
+      //let the user know that 5 seconds has passed so the user can release the button
+      if (currentTime > 5000) {
+        digitalWrite(beeper, HIGH);
+        Serial.println("reset");
+      }
+
+      button5.loop();
+      buttonRelease = button5.isReleased();
+    }
+
+    //if the code exits the while loop it means the button was released and we need to reset time buttons
+    if (buttonRelease == true) {
+      if (currentTime > 5000) {
+        digitalWrite(beeper, LOW);
+        delay(1000);
+        time1 = 1000;
+        time2 = 2000;
+        time3 = 3000;
+        time4 = 4000;
+        EEPROM.write(addr5, 0);
+      }
+    }
   }
-  else {                             // the button has been just released
+}
+
+void programming_mode(int button_number) {
+
+  digitalWrite(beeper, HIGH);
+
+  bool buttonPress5 = false;
+
+  //wehen button 5 is pressed it means the user wants to exit programming mode
+  while (buttonPress5 == false) {
+    if (button_number == first_button) {
+      programTime1();
+    }
+    else if (button_number == second_button) {
+      programTime2();
+    }
+    else if (button_number == third_button) {
+      programTime3();
+    }
+    else if (button_number == fourth_button) {
+      programTime4();
+    }
+
+    button5.loop();
+    buttonPress5 = button5.isPressed();
+  }
+
+  first_time = true;
+  Serial.println("out");
+
+  delay(500);
+  digitalWrite(beeper, LOW);
+}
+
+void programTime1() {
+
+  //if it's the first time the user enters programming mode, it should reset the time
+  //for the given button
+  if (first_time == true) {
+    time1 = 0;
+    first_time = false;
+  }
+
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed1 = 0;
+
+  //time the button has been pressed
+  int currentTime = 0;
+
+  //check if button is pressed
+  button1.loop();
+  buttonPress = button1.isPressed();
+
+  //if button is pressed wait until it is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
+    digitalWrite(relay, HIGH);
+
+    //start counting the time
+    startPressed1 = millis();
+
+    //wait until button is released
+    while (buttonRelease == false) {
+      button1.loop();
+      buttonRelease = button1.isReleased();
+    }
+
+    //count how much time the button was pressed
+    digitalWrite(relay, LOW);
+    endPressed1 = millis();
+    holdTime1 = endPressed1 - startPressed1;
+
+    //add the time the button was pressed to time1
+    time1 += holdTime1;
+    EEPROM.write(addr1, time1 / 128);  //EEPROM accepts values between 0-255
+    EEPROM.write(addr5, 1);
+    Serial.println("out");
+  }
+}
+
+void programTime2() {
+
+  //if it's the first time the user enters programming mode, it should reset the time
+  //for the given button
+  if (first_time == true) {
+    time2 = 0;
+    first_time = false;
+  }
+
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed2 = 0;
+
+  //time the button has been pressed
+  int currentTime = 0;
+
+  //check if button is pressed
+  button2.loop();
+  buttonPress = button2.isPressed();
+
+  //if button is pressed wait until it is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
+    digitalWrite(relay, HIGH);
+
+    //start counting the time
+    startPressed2 = millis();
+
+    //wait until button is released
+    while (buttonRelease == false) {
+      button2.loop();
+      buttonRelease = button2.isReleased();
+    }
+
+    //count how much time the button was pressed
+    digitalWrite(relay, LOW);
+    endPressed2 = millis();
+    holdTime2 = endPressed2 - startPressed2;
+
+    //add the time the button was pressed to time1
+    time2 += holdTime2;
+    EEPROM.write(addr2, time2 / 128);
+    EEPROM.write(addr5, 1);
+    Serial.println("out");
+  }
+}
+
+void programTime3() {
+
+  //if it's the first time the user enters programming mode, it should reset the time
+  //for the given button
+  if (first_time == true) {
+    time3 = 0;
+    first_time = false;
+  }
+
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed3 = 0;
+
+  //time the button has been pressed
+  int currentTime = 0;
+
+  //check if button is pressed
+  button3.loop();
+  buttonPress = button3.isPressed();
+
+  //if button is pressed wait until it is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
+    digitalWrite(relay, HIGH);
+
+    //start counting the time
+    startPressed3 = millis();
+
+    //wait until button is released
+    while (buttonRelease == false) {
+      button3.loop();
+      buttonRelease = button3.isReleased();
+    }
+
+    //count how much time the button was pressed
+    digitalWrite(relay, LOW);
+    endPressed3 = millis();
+    holdTime3 = endPressed3 - startPressed3;
+
+    //add the time the button was pressed to time1
+    time3 += holdTime3;
+    EEPROM.write(addr3, time3 / 128);
+    EEPROM.write(addr5, 1);
+    Serial.println("out");
+  }
+}
+
+void programTime4() {
+
+  //if it's the first time the user enters programming mode, it should reset the time
+  //for the given button
+  if (first_time == true) {
+    time4 = 0;
+    first_time = false;
+  }
+
+  //button starts not pressed and released
+  bool buttonPress = false;
+  bool buttonRelease = false;
+  startPressed4 = 0;
+
+  //time the button has been pressed
+  int currentTime = 0;
+
+  //check if button is pressed
+  button4.loop();
+  buttonPress = button4.isPressed();
+
+  //if button is pressed wait until it is released
+  if (buttonPress == true) {
+    Serial.println("pressed");
+    digitalWrite(relay, HIGH);
+
+    //start counting the time
+    startPressed4 = millis();
+
+    //wait until button is released
+    while (buttonRelease == false) {
+      button4.loop();
+      buttonRelease = button4.isReleased();
+    }
+
+    //count how much time the button was pressed
+    digitalWrite(relay, LOW);
     endPressed4 = millis();
     holdTime4 = endPressed4 - startPressed4;
 
-    if (holdTime4 < 2000) {
-      trigger_relay(button4);
-    }
-
-    if (holdTime4 >= 2000) {
-      first_time = true;
-      programming_mode(button4);
-    }
+    //add the time the button was pressed to time1
+    time4 += holdTime4;
+    EEPROM.write(addr4, time4 / 128);
+    EEPROM.write(addr5, 1);
+    Serial.println("out");
   }
 }
 
-void trigger_relay(int button) {
+void trigger_relay(int button_number) {
 
-  if (button == button1) {
+  if (button_number == first_button) {
     digitalWrite(relay, HIGH);
-    delay(EEPROM.read(addr1) * 128);
+    
+    //if addr == 1 it means in the past the user entered programming mode
+    if (EEPROM.read(addr5) == 1) {
+      delay(EEPROM.read(addr1) * 128);
+    }
+    else {
+      delay(time1);
+    }
     digitalWrite(relay, LOW);
   }
-  else if (button == button2) {
+  else if (button_number == second_button) {
     digitalWrite(relay, HIGH);
-    delay(EEPROM.read(addr2) * 128);
+    if (EEPROM.read(addr5) == 1) {
+      delay(EEPROM.read(addr2) * 128);
+    }
+    else {
+      delay(time2);
+    }
     digitalWrite(relay, LOW);
   }
-  else if (button == button3) {
+  else if (button_number == third_button) {
     digitalWrite(relay, HIGH);
-    delay(EEPROM.read(addr3) * 128);
+    if (EEPROM.read(addr5) == 1) {
+      delay(EEPROM.read(addr3) * 128);
+    }
+    else {
+      delay(time3);
+    }
     digitalWrite(relay, LOW);
   }
-  else if (button == button4) {
+  else if (button_number == fourth_button) {
     digitalWrite(relay, HIGH);
-    delay(EEPROM.read(addr4) * 128);
+    if (EEPROM.read(addr5) == 1) {
+      delay(EEPROM.read(addr4) * 128);
+    }
+    else {
+      delay(time4);
+    }
     digitalWrite(relay, LOW);
   }
 }
