@@ -69,10 +69,14 @@ void setup() {
 
   Serial.begin(9600);
 
-  //set inputs and outputs
-  button1.setDebounceTime(50); // set debounce time to 50 milliseconds
+  //set debounce time to 50 milliseconds 
+  button1.setDebounceTime(50); 
+  button2.setDebounceTime(50); 
+  button3.setDebounceTime(50); 
+  button4.setDebounceTime(50); 
   button5.setDebounceTime(50);
 
+  //set outputs
   pinMode(relay, OUTPUT);
   pinMode(beeper, OUTPUT);
 
@@ -110,7 +114,6 @@ void checkButton1() {
 
   //if button is pressed stop checking for other buttons and wait until current buttonn is released
   if (buttonPress == true) {
-    Serial.println("pressed");
 
     //start counting the time
     startPressed1 = millis();
@@ -123,8 +126,7 @@ void checkButton1() {
 
       //let the user know that 2 seconds has passed so the user can release the button
       if (currentTime > 2000) {
-        digitalWrite(beeper, HIGH);
-        Serial.println("ups");
+        tone(beeper, 1000);
       }
 
       button1.loop();
@@ -135,13 +137,11 @@ void checkButton1() {
     //to go to programming mode or trigger the relay
     if (buttonRelease == true) {
       if (currentTime > 2000) {
-        digitalWrite(beeper, LOW);
+        noTone(beeper);
         delay(1000);
-        Serial.println("programming");
         programming_mode(first_button);
       }
       else if ( currentTime < 2000) {
-        Serial.println("trigger");
         trigger_relay(first_button);
       }
     }
@@ -163,7 +163,6 @@ void checkButton2() {
 
   //if button is pressed stop checking for other buttons and wait until current buttonn is released
   if (buttonPress == true) {
-    Serial.println("pressed");
 
     //start counting the time
     startPressed2 = millis();
@@ -176,8 +175,7 @@ void checkButton2() {
 
       //let the user know that 2 seconds has passed so the user can release the button
       if (currentTime > 2000) {
-        digitalWrite(beeper, HIGH);
-        Serial.println("ups");
+        tone(beeper, 1000);
       }
 
       button2.loop();
@@ -188,13 +186,11 @@ void checkButton2() {
     //to go to programming mode or trigger the relay
     if (buttonRelease == true) {
       if (currentTime > 2000) {
-        digitalWrite(beeper, LOW);
+        noTone(beeper);
         delay(1000);
-        Serial.println("programming");
         programming_mode(second_button);
       }
       else if ( currentTime < 2000) {
-        Serial.println("trigger");
         trigger_relay(second_button);
       }
     }
@@ -216,7 +212,6 @@ void checkButton3() {
 
   //if button is pressed stop checking for other buttons and wait until current buttonn is released
   if (buttonPress == true) {
-    Serial.println("pressed");
 
     //start counting the time
     startPressed3 = millis();
@@ -229,8 +224,7 @@ void checkButton3() {
 
       //let the user know that 2 seconds has passed so the user can release the button
       if (currentTime > 2000) {
-        digitalWrite(beeper, HIGH);
-        Serial.println("ups");
+        tone(beeper, 1000);
       }
 
       button3.loop();
@@ -241,13 +235,11 @@ void checkButton3() {
     //to go to programming mode or trigger the relay
     if (buttonRelease == true) {
       if (currentTime > 2000) {
-        digitalWrite(beeper, LOW);
+        noTone(beeper);
         delay(1000);
-        Serial.println("programming");
         programming_mode(third_button);
       }
       else if ( currentTime < 2000) {
-        Serial.println("trigger");
         trigger_relay(third_button);
       }
     }
@@ -269,7 +261,6 @@ void checkButton4() {
 
   //if button is pressed stop checking for other buttons and wait until current buttonn is released
   if (buttonPress == true) {
-    Serial.println("pressed");
 
     //start counting the time
     startPressed4 = millis();
@@ -282,8 +273,7 @@ void checkButton4() {
 
       //let the user know that 2 seconds has passed so the user can release the button
       if (currentTime > 2000) {
-        digitalWrite(beeper, HIGH);
-        Serial.println("ups");
+        tone(beeper, 1000);
       }
 
       button4.loop();
@@ -294,13 +284,11 @@ void checkButton4() {
     //to go to programming mode or trigger the relay
     if (buttonRelease == true) {
       if (currentTime > 2000) {
-        digitalWrite(beeper, LOW);
+        noTone(beeper);
         delay(1000);
-        Serial.println("programming");
         programming_mode(fourth_button);
       }
       else if ( currentTime < 2000) {
-        Serial.println("trigger");
         trigger_relay(fourth_button);
       }
     }
@@ -322,7 +310,6 @@ void checkButton5() {
 
   //if button is pressed stop checking for other buttons and wait until current buttonn is released
   if (buttonPress == true) {
-    Serial.println("pressed");
 
     //start counting the time
     startPressed5 = millis();
@@ -336,7 +323,7 @@ void checkButton5() {
       //let the user know that 5 seconds has passed so the user can release the button
       if (currentTime > 5000) {
         digitalWrite(beeper, HIGH);
-        Serial.println("reset");
+        tone(beeper, 2000);
       }
 
       button5.loop();
@@ -346,8 +333,8 @@ void checkButton5() {
     //if the code exits the while loop it means the button was released and we need to reset time buttons
     if (buttonRelease == true) {
       if (currentTime > 5000) {
-        digitalWrite(beeper, LOW);
         delay(1000);
+        noTone(beeper);
         time1 = 1000;
         time2 = 2000;
         time3 = 3000;
@@ -360,7 +347,10 @@ void checkButton5() {
 
 void programming_mode(int button_number) {
 
-  digitalWrite(beeper, HIGH);
+  //let the user know is in programming mode
+  tone(beeper, 2000);
+  delay(1000);
+  noTone(beeper);
 
   bool buttonPress5 = false;
 
@@ -384,10 +374,6 @@ void programming_mode(int button_number) {
   }
 
   first_time = true;
-  Serial.println("out");
-
-  delay(500);
-  digitalWrite(beeper, LOW);
 }
 
 void programTime1() {
@@ -413,7 +399,6 @@ void programTime1() {
 
   //if button is pressed wait until it is released
   if (buttonPress == true) {
-    Serial.println("pressed");
     digitalWrite(relay, HIGH);
 
     //start counting the time
@@ -434,7 +419,6 @@ void programTime1() {
     time1 += holdTime1;
     EEPROM.write(addr1, time1 / 128);  //EEPROM accepts values between 0-255
     EEPROM.write(addr5, 1);
-    Serial.println("out");
   }
 }
 
@@ -461,7 +445,6 @@ void programTime2() {
 
   //if button is pressed wait until it is released
   if (buttonPress == true) {
-    Serial.println("pressed");
     digitalWrite(relay, HIGH);
 
     //start counting the time
@@ -482,7 +465,6 @@ void programTime2() {
     time2 += holdTime2;
     EEPROM.write(addr2, time2 / 128);
     EEPROM.write(addr5, 1);
-    Serial.println("out");
   }
 }
 
@@ -509,7 +491,6 @@ void programTime3() {
 
   //if button is pressed wait until it is released
   if (buttonPress == true) {
-    Serial.println("pressed");
     digitalWrite(relay, HIGH);
 
     //start counting the time
@@ -530,7 +511,6 @@ void programTime3() {
     time3 += holdTime3;
     EEPROM.write(addr3, time3 / 128);
     EEPROM.write(addr5, 1);
-    Serial.println("out");
   }
 }
 
@@ -557,7 +537,6 @@ void programTime4() {
 
   //if button is pressed wait until it is released
   if (buttonPress == true) {
-    Serial.println("pressed");
     digitalWrite(relay, HIGH);
 
     //start counting the time
@@ -578,7 +557,6 @@ void programTime4() {
     time4 += holdTime4;
     EEPROM.write(addr4, time4 / 128);
     EEPROM.write(addr5, 1);
-    Serial.println("out");
   }
 }
 
@@ -586,7 +564,7 @@ void trigger_relay(int button_number) {
 
   if (button_number == first_button) {
     digitalWrite(relay, HIGH);
-    
+
     //if addr == 1 it means in the past the user entered programming mode
     if (EEPROM.read(addr5) == 1) {
       delay(EEPROM.read(addr1) * 128);
