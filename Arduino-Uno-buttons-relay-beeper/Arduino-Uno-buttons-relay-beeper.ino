@@ -15,6 +15,8 @@ uint16_t time2 = 2000;
 uint16_t time3 = 3000;
 uint16_t time4 = 4000;
 
+//useful for emergency stop
+unsigned long time_now = 0;
 
 //address value in EEPROM for buttons time
 int addr1 = 0;
@@ -69,11 +71,11 @@ void setup() {
 
   Serial.begin(9600);
 
-  //set debounce time to 50 milliseconds 
-  button1.setDebounceTime(50); 
-  button2.setDebounceTime(50); 
-  button3.setDebounceTime(50); 
-  button4.setDebounceTime(50); 
+  //set debounce time to 50 milliseconds
+  button1.setDebounceTime(50);
+  button2.setDebounceTime(50);
+  button3.setDebounceTime(50);
+  button4.setDebounceTime(50);
   button5.setDebounceTime(50);
 
   //set outputs
@@ -562,17 +564,38 @@ void programTime4() {
 
 void trigger_relay(int button_number) {
 
-  if (button_number == first_button) {
-    digitalWrite(relay, HIGH);
+  time_now = millis();
+  int statusButton = 0;   //the button start released
+  bool exitFlag = false;  //enter the while loop at start
 
+  if (button_number == first_button) {
     //if addr == 1 it means in the past the user entered programming mode
     if (EEPROM.read(addr5) == 1) {
-      delay(EEPROM.read(addr1) * 128);
+      digitalWrite(relay, HIGH);
+      int eepromTime = EEPROM.read(addr1) * 128;
+      while ((millis() < time_now + eepromTime) & exitFlag == false) {
+        button1.loop();
+        statusButton = button1.isPressed();
+        if (statusButton == 1) {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
     else {
-      delay(time1);
+      digitalWrite(relay, HIGH);
+
+      while ((millis() < time_now + time1) & exitFlag == false) {
+        button1.loop();
+        statusButton = button1.isPressed();
+        if (statusButton == 1) {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    digitalWrite(relay, LOW);
   }
   else if (button_number == second_button) {
     digitalWrite(relay, HIGH);
