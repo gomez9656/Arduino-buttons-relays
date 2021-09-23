@@ -597,34 +597,116 @@ void trigger_relay(int button_number) {
       digitalWrite(relay, LOW);
     }
   }
-  else if (button_number == second_button) {
-    digitalWrite(relay, HIGH);
-    if (EEPROM.read(addr5) == 1) {
-      delay(EEPROM.read(addr2) * 128);
+  else if (button_number == second_button)
+  {
+    if (EEPROM.read(addr5) == 1)
+    {
+      digitalWrite(relay, HIGH);
+      int eepromTime = EEPROM.read(addr2) * 128;
+
+      while ((millis() < time_now + eepromTime) & exitFlag == false)
+      {
+        button2.loop();
+        statusButton = button2.isPressed();
+
+        if (statusButton == 1)
+        {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    else {
-      delay(time2);
+    else
+    {
+      digitalWrite(relay, HIGH);
+
+      while ((millis() < time_now + time2) & exitFlag == false)
+      {
+        button2.loop();
+        statusButton = button2.isPressed();
+
+        if (statusButton == 1)
+        {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    digitalWrite(relay, LOW);
   }
   else if (button_number == third_button) {
-    digitalWrite(relay, HIGH);
-    if (EEPROM.read(addr5) == 1) {
-      delay(EEPROM.read(addr3) * 128);
+    if (EEPROM.read(addr5) == 1)
+    {
+      digitalWrite(relay, HIGH);
+      int eepromTime = EEPROM.read(addr3) * 128;
+
+      while ((millis() < time_now + eepromTime) & exitFlag == false)
+      {
+        button3.loop();
+        statusButton = button3.isPressed();
+
+        if (statusButton == 1)
+        {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    else {
-      delay(time3);
+    else
+    {
+      digitalWrite(relay, HIGH);
+
+      while ((millis() < time_now + time3) & exitFlag == false)
+      {
+        button3.loop();
+        statusButton = button3.isPressed();
+
+        if (statusButton == 1)
+        {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    digitalWrite(relay, LOW);
   }
   else if (button_number == fourth_button) {
-    digitalWrite(relay, HIGH);
-    if (EEPROM.read(addr5) == 1) {
-      delay(EEPROM.read(addr4) * 128);
+    if (EEPROM.read(addr5) == 1)
+    {
+      digitalWrite(relay, HIGH);
+      int eepromTime = EEPROM.read(addr4) * 128;
+
+      while ((millis() < time_now + eepromTime) & exitFlag == false)
+      {
+        button4.loop();
+        statusButton = button4.isPressed();
+
+        if (statusButton == 1)
+        {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    else {
-      delay(time4);
+    else
+    {
+      digitalWrite(relay, HIGH);
+
+      while ((millis() < time_now + time4) & exitFlag == false)
+      {
+        button4.loop();
+        statusButton = button4.isPressed();
+
+        if (statusButton == 1)
+        {
+          digitalWrite(relay, LOW);
+          exitFlag = true;
+        }
+      }
+      digitalWrite(relay, LOW);
     }
-    digitalWrite(relay, LOW);
   }
 }
